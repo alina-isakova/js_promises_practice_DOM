@@ -1,9 +1,12 @@
 'use strict';
 
 const firstPromise = new Promise((resolve, reject) => {
-  document.body.addEventListener('click', () => {
+  const resolveFirst = () => {
     resolve('First promise was resolved');
-  });
+    document.body.removeEventListener('click', resolveFirst);
+  };
+
+  document.body.addEventListener('click', resolveFirst);
 
   setTimeout(() => {
     reject(new Error('First promise was rejected'));
@@ -15,9 +18,12 @@ firstPromise
   .catch((error) => addErrorMessage(error));
 
 const secondPromise = new Promise((resolve) => {
-  document.body.addEventListener('mousedown', () => {
+  const resolveSecond = () => {
     resolve('Second promise was resolved');
-  });
+    document.body.removeEventListener('click', resolveSecond);
+  };
+
+  document.body.addEventListener('mousedown', resolveSecond);
 });
 
 secondPromise.then((result) => addSuccessMessage(result));
@@ -26,7 +32,7 @@ const thirdPromise = new Promise((resolve) => {
   let leftClicked = false;
   let rightClicked = false;
 
-  document.body.addEventListener('mousedown', (e) => {
+  const resolveThird = (e) => {
     if (e.button === 0) {
       leftClicked = true;
     }
@@ -38,10 +44,18 @@ const thirdPromise = new Promise((resolve) => {
     if (leftClicked && rightClicked) {
       resolve('Third promise was resolved');
     }
-  });
+
+    document.body.removeEventListener('click', resolveThird);
+  };
+
+  document.body.addEventListener('mousedown', resolveThird);
 });
 
 thirdPromise.then((result) => addSuccessMessage(result));
+
+document.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+});
 
 function addSuccessMessage(message) {
   document.body.insertAdjacentHTML(
