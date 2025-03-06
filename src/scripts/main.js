@@ -20,7 +20,7 @@ firstPromise
 const secondPromise = new Promise((resolve) => {
   const resolveSecond = () => {
     resolve('Second promise was resolved');
-    document.body.removeEventListener('click', resolveSecond);
+    document.body.removeEventListener('mousedown', resolveSecond);
   };
 
   document.body.addEventListener('mousedown', resolveSecond);
@@ -29,33 +29,45 @@ const secondPromise = new Promise((resolve) => {
 secondPromise.then((result) => addSuccessMessage(result));
 
 const thirdPromise = new Promise((resolve) => {
-  let leftClicked = false;
-  let rightClicked = false;
+  let leftPressed = false;
+  let rightPressed = false;
 
-  const resolveThird = (e) => {
+  function onMouseDown(e) {
     if (e.button === 0) {
-      leftClicked = true;
+      leftPressed = true;
     }
 
     if (e.button === 2) {
-      rightClicked = true;
+      rightPressed = true;
     }
 
-    if (leftClicked && rightClicked) {
+    if (leftPressed && rightPressed) {
       resolve('Third promise was resolved');
+
+      document.body.removeEventListener('mousedown', onMouseDown);
+      document.body.removeEventListener('mouseup', onMouseUp);
+    }
+  }
+
+  function onMouseUp(e) {
+    if (e.button === 0) {
+      leftPressed = false;
     }
 
-    document.body.removeEventListener('click', resolveThird);
-  };
+    if (e.button === 2) {
+      rightPressed = false;
+    }
+  }
 
-  document.body.addEventListener('mousedown', resolveThird);
+  document.body.addEventListener('mousedown', onMouseDown);
+  document.body.addEventListener('mouseup', onMouseUp);
+
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+  });
 });
 
 thirdPromise.then((result) => addSuccessMessage(result));
-
-document.addEventListener('contextmenu', (e) => {
-  e.preventDefault();
-});
 
 function addSuccessMessage(message) {
   document.body.insertAdjacentHTML(
